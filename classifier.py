@@ -45,13 +45,13 @@ parser.add_argument("--optimizer", type=str, default="adam",
                     help="Classifier optimizer (SGD / RMSprop / Adam, etc.)")
 parser.add_argument("--clip_grad_norm", type=float, default=5,
                     help="Clip gradient norms (0 to disable)")
-parser.add_argument("--n_epochs", type=int, default=1000,
+parser.add_argument("--n_epochs", type=int, default=1,
                     help="Total number of epochs")
-parser.add_argument("--epoch_size", type=int, default=50000,
+parser.add_argument("--epoch_size", type=int, default=10000,
                     help="Number of samples per epoch")
 parser.add_argument("--reload", type=str, default="",
                     help="Reload a pretrained classifier")
-parser.add_argument("--debug", type=bool_flag, default=False,
+parser.add_argument("--debug", type=bool_flag, default=True,
                     help="Debug mode (only load a subset of the whole dataset)")
 params = parser.parse_args()
 
@@ -68,7 +68,7 @@ valid_data = DataSampler(data[1], attributes[1], params)
 test_data = DataSampler(data[2], attributes[2], params)
 
 # build the model / reload / optimizer
-classifier = Classifier(params).cuda()
+classifier = Classifier(params).cpu()
 if params.reload:
     reload_model(classifier, params.reload,
                  ['img_sz', 'img_fm', 'init_fm', 'hid_dim', 'attr', 'n_attr'])
@@ -79,7 +79,8 @@ def save_model(name):
     """
     Save the model.
     """
-    path = os.path.join(params.dump_path, '%s.pth' % name)
+    # params.dump_path
+    path = os.path.join('models', '%s.pth' % name)
     logger.info('Saving the classifier to %s ...' % path)
     torch.save(classifier, path)
 

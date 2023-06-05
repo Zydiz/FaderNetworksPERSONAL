@@ -97,7 +97,7 @@ class Trainer(object):
         preds = self.lat_dis(Variable(enc_outputs[-1 - params.n_skip].data))
         # loss / optimize
         loss = get_attr_loss(preds, batch_y, False, params)
-        self.stats['lat_dis_costs'].append(loss.data[0])
+        self.stats['lat_dis_costs'].append(loss.data)
         self.lat_dis_optimizer.zero_grad()
         loss.backward()
         if params.clip_grad_norm:
@@ -120,7 +120,7 @@ class Trainer(object):
         real_preds = self.ptc_dis(batch_x)
         fake_preds = self.ptc_dis(Variable(dec_outputs[-1].data))
         y_fake = Variable(torch.FloatTensor(real_preds.size())
-                               .fill_(params.smooth_label).cuda())
+                               .fill_(params.smooth_label).cpu())
         # loss / optimize
         loss = F.binary_cross_entropy(real_preds, 1 - y_fake)
         loss += F.binary_cross_entropy(fake_preds, y_fake)
@@ -171,7 +171,7 @@ class Trainer(object):
         enc_outputs, dec_outputs = self.ae(batch_x, batch_y)
         # autoencoder loss from reconstruction
         loss = params.lambda_ae * ((batch_x - dec_outputs[-1]) ** 2).mean()
-        self.stats['rec_costs'].append(loss.data[0])
+        self.stats['rec_costs'].append(loss.data)
         # encoder loss from the latent discriminator
         if params.lambda_lat_dis:
             lat_dis_preds = self.lat_dis(enc_outputs[-1 - params.n_skip])
@@ -185,7 +185,7 @@ class Trainer(object):
         if params.lambda_ptc_dis:
             ptc_dis_preds = self.ptc_dis(dec_outputs_flipped[-1])
             y_fake = Variable(torch.FloatTensor(ptc_dis_preds.size())
-                                   .fill_(params.smooth_label).cuda())
+                                   .fill_(params.smooth_label).cpu())
             ptc_dis_loss = F.binary_cross_entropy(ptc_dis_preds, 1 - y_fake)
             loss = loss + get_lambda(params.lambda_ptc_dis, params) * ptc_dis_loss
         # autoencoder loss from the classifier discriminator
@@ -270,7 +270,7 @@ def classifier_step(classifier, optimizer, data, params, costs):
     preds = classifier(batch_x)
     # loss / optimize
     loss = get_attr_loss(preds, batch_y, False, params)
-    costs.append(loss.data[0])
+    costs.append(loss.data)
     optimizer.zero_grad()
     loss.backward()
     if params.clip_grad_norm:

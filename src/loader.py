@@ -16,14 +16,7 @@ logger = getLogger()
 
 
 AVAILABLE_ATTR = [
-    "5_o_Clock_Shadow", "Arched_Eyebrows", "Attractive", "Bags_Under_Eyes", "Bald",
-    "Bangs", "Big_Lips", "Big_Nose", "Black_Hair", "Blond_Hair", "Blurry", "Brown_Hair",
-    "Bushy_Eyebrows", "Chubby", "Double_Chin", "Eyeglasses", "Goatee", "Gray_Hair",
-    "Heavy_Makeup", "High_Cheekbones", "Male", "Mouth_Slightly_Open", "Mustache",
-    "Narrow_Eyes", "No_Beard", "Oval_Face", "Pale_Skin", "Pointy_Nose",
-    "Receding_Hairline", "Rosy_Cheeks", "Sideburns", "Smiling", "Straight_Hair",
-    "Wavy_Hair", "Wearing_Earrings", "Wearing_Hat", "Wearing_Lipstick",
-    "Wearing_Necklace", "Wearing_Necktie", "Young"
+    "bright", "dark", "distortion", "percussive"
 ]
 
 DATA_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
@@ -50,7 +43,7 @@ def load_images(params):
     Load celebA dataset.
     """
     # load data
-    images_filename = 'images_%i_%i_20000.pth' if params.debug else 'images_%i_%i.pth'
+    images_filename = 'images_%i_%i.pth'
     images_filename = images_filename % (params.img_sz, params.img_sz)
     images = torch.load(os.path.join(DATA_PATH, images_filename))
     attributes = torch.load(os.path.join(DATA_PATH, 'attributes.pth'))
@@ -63,12 +56,13 @@ def load_images(params):
     attributes = torch.cat([x.unsqueeze(1) for x in attrs], 1)
     # split train / valid / test
     if params.debug:
-        train_index = 10000
-        valid_index = 15000
-        test_index = 20000
+        train_index = 1000
+        valid_index = 5000
+        test_index = 10000
     else:
-        train_index = 162770
-        valid_index = 162770 + 19867
+        # for ds the size of 4096
+        train_index = 3277
+        valid_index = 3686
         test_index = len(images)
     train_images = images[:train_index]
     valid_images = images[train_index:valid_index]
@@ -119,14 +113,14 @@ class DataSampler(object):
         idx = torch.LongTensor(bs).random_(len(self.images))
 
         # select images / attributes
-        batch_x = normalize_images(self.images.index_select(0, idx).cuda())
-        batch_y = self.attributes.index_select(0, idx).cuda()
+        batch_x = normalize_images(self.images.index_select(0, idx).cpu())
+        batch_y = self.attributes.index_select(0, idx).cpu()
 
         # data augmentation
         if self.v_flip and np.random.rand() <= 0.5:
-            batch_x = batch_x.index_select(2, torch.arange(batch_x.size(2) - 1, -1, -1).long().cuda())
+            batch_x = batch_x.index_select(2, torch.arange(batch_x.size(2) - 1, -1, -1).long().cpu())
         if self.h_flip and np.random.rand() <= 0.5:
-            batch_x = batch_x.index_select(3, torch.arange(batch_x.size(3) - 1, -1, -1).long().cuda())
+            batch_x = batch_x.index_select(3, torch.arange(batch_x.size(3) - 1, -1, -1).long().cpu())
 
         return Variable(batch_x, volatile=False), Variable(batch_y, volatile=False)
 
@@ -135,6 +129,6 @@ class DataSampler(object):
         Get a batch of images in a range with their attributes.
         """
         assert i < j
-        batch_x = normalize_images(self.images[i:j].cuda())
-        batch_y = self.attributes[i:j].cuda()
+        batch_x = normalize_images(self.images[i:j].cpu())
+        batch_y = self.attributes[i:j].cpu()
         return Variable(batch_x, volatile=True), Variable(batch_y, volatile=True)

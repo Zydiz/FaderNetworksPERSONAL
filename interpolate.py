@@ -80,7 +80,7 @@ def get_interpolations(ae, images, attributes, params):
     outputs.append(images)
     outputs.append(ae.decode(enc_outputs, attributes)[-1])
     for alpha in alphas:
-        alpha = Variable(alpha.unsqueeze(0).expand((len(images), 2)).cuda())
+        alpha = Variable(alpha.unsqueeze(0).expand((len(images), 2)).cpu())
         outputs.append(ae.decode(enc_outputs, alpha)[-1])
 
     # return stacked images

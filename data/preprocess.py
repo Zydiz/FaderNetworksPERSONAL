@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 
-N_IMAGES = 202599
+N_IMAGES = 10000
 IMG_SIZE = 256
 IMG_PATH = 'images_%i_%i.pth' % (IMG_SIZE, IMG_SIZE)
 ATTR_PATH = 'attributes.pth'
@@ -21,9 +21,9 @@ def preprocess_images():
     print("Reading images from img_align_celeba/ ...")
     raw_images = []
     for i in range(1, N_IMAGES + 1):
-        if i % 10000 == 0:
+        if i % 1000 == 0:
             print(i)
-        raw_images.append(mpimg.imread('img_align_celeba/%06i.jpg' % i)[20:-20])
+        raw_images.append(mpimg.imread('data/img_align_celeba/%06i.jpg' % i)[20:-20])
 
     if len(raw_images) != N_IMAGES:
         raise Exception("Found %i images. Expected %i" % (len(raw_images), N_IMAGES))
@@ -56,7 +56,7 @@ def preprocess_attributes():
         print("%s exists, nothing to do." % ATTR_PATH)
         return
 
-    attr_lines = [line.rstrip() for line in open('list_attr_celeba.txt', 'r')]
+    attr_lines = [line.rstrip() for line in open('data/list_attr_celeba.txt', 'r')]
     assert len(attr_lines) == N_IMAGES + 2
 
     attr_keys = attr_lines[1].split()

@@ -24,7 +24,9 @@ parser.add_argument("--img_sz", type=int, default=256,
                     help="Image sizes (images have to be squared)")
 parser.add_argument("--img_fm", type=int, default=3,
                     help="Number of feature maps (1 for grayscale, 3 for RGB)")
-parser.add_argument("--attr", type=attr_flag, default="Smiling,Male",
+"""parser.add_argument("--attr", type=attr_flag, default="Smiling,Male",
+                    help="Attributes to classify")"""
+parser.add_argument("--attr", type=attr_flag, default="Smiling",
                     help="Attributes to classify")
 parser.add_argument("--instance_norm", type=bool_flag, default=False,
                     help="Use instance normalization instead of batch normalization")
@@ -74,9 +76,9 @@ parser.add_argument("--dis_optimizer", type=str, default="adam,lr=0.0002",
                     help="Discriminator optimizer (SGD / RMSprop / Adam, etc.)")
 parser.add_argument("--clip_grad_norm", type=float, default=5,
                     help="Clip gradient norms (0 to disable)")
-parser.add_argument("--n_epochs", type=int, default=1000,
+parser.add_argument("--n_epochs", type=int, default=1,
                     help="Total number of epochs")
-parser.add_argument("--epoch_size", type=int, default=50000,
+parser.add_argument("--epoch_size", type=int, default=10000,
                     help="Number of samples per epoch")
 parser.add_argument("--ae_reload", type=str, default="",
                     help="Reload a pretrained encoder")
@@ -114,11 +116,11 @@ train_data = DataSampler(data[0], attributes[0], params)
 valid_data = DataSampler(data[1], attributes[1], params)
 
 # build the model
-ae = AutoEncoder(params).cuda()
-lat_dis = LatentDiscriminator(params).cuda() if params.n_lat_dis else None
-ptc_dis = PatchDiscriminator(params).cuda() if params.n_ptc_dis else None
-clf_dis = Classifier(params).cuda() if params.n_clf_dis else None
-eval_clf = torch.load(params.eval_clf).cuda().eval()
+ae = AutoEncoder(params).cpu()
+lat_dis = LatentDiscriminator(params).cpu() if params.n_lat_dis else None
+ptc_dis = PatchDiscriminator(params).cpu() if params.n_ptc_dis else None
+clf_dis = Classifier(params).cpu() if params.n_clf_dis else None
+eval_clf = torch.load(params.eval_clf).cpu().eval()
 
 # trainer / evaluator
 trainer = Trainer(ae, lat_dis, ptc_dis, clf_dis, train_data, params)

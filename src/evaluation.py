@@ -48,7 +48,7 @@ class Evaluator(object):
         for i in range(0, len(data), bs):
             batch_x, batch_y = data.eval_batch(i, i + bs)
             _, dec_outputs = self.ae(batch_x, batch_y)
-            costs.append(((dec_outputs[-1] - batch_x) ** 2).mean().data[0])
+            costs.append(((dec_outputs[-1] - batch_x) ** 2).mean().data)
 
         return np.mean(costs)
 
@@ -226,7 +226,7 @@ class Evaluator(object):
             ('n_epoch', n_epoch),
             ('ae_loss', ae_loss)
         ] + log_lat_dis + log_ptc_dis + log_clf_dis + log_clf)
-        logger.debug("__log__:%s" % json.dumps(to_log))
+        # logger.debug("__log__:%s" % json.dumps(to_log))
 
         return to_log
 

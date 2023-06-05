@@ -260,7 +260,7 @@ def get_attr_loss(output, attributes, flip, params):
         if flip:
             # generate different categories
             shift = torch.LongTensor(y.size()).random_(n_cat - 1) + 1
-            y = (y + Variable(shift.cuda())) % n_cat
+            y = (y + Variable(shift.cpu())) % n_cat
         loss += F.cross_entropy(x, y)
         k += n_cat
     return loss
@@ -323,4 +323,4 @@ def flip_attributes(attributes, params, attribute_id, new_value=None):
         assert type(new_value) is int
         flip_attribute(attribute_id, new_value)
 
-    return Variable(attributes.cuda())
+    return Variable(attributes.cpu())
