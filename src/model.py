@@ -111,6 +111,7 @@ class AutoEncoder(nn.Module):
     def decode(self, enc_outputs, y):
         bs = enc_outputs[0].size(0)
         assert len(enc_outputs) == self.n_layers + 1
+        print(f"debug! y.size():{y.size()}, bs={bs}, n_attr={self.n_attr}")
         assert y.size() == (bs, self.n_attr)
 
         dec_outputs = [enc_outputs[-1]]

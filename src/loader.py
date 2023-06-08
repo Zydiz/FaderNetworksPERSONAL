@@ -61,9 +61,9 @@ def load_images(params):
         test_index = 10000
     else:
         # for ds the size of 4096
-        train_index = 3277
-        valid_index = 3686
         test_index = len(images)
+        valid_index = test_index*90//100
+        train_index = test_index*80//100
     train_images = images[:train_index]
     valid_images = images[train_index:valid_index]
     test_images = images[valid_index:test_index]

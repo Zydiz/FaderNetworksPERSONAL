@@ -97,8 +97,8 @@ for k in range(0, params.n_images, 100):
 
 interpolations = torch.cat(interpolations, 0)
 assert interpolations.size() == (params.n_images, 2 + params.n_interpolations,
-                                 3, params.img_sz, params.img_sz)
-
+                                 1, params.img_sz, params.img_sz)
+# 1 was 3
 
 def get_grid(images, row_wise, plot_size=5):
     """
