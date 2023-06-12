@@ -5,6 +5,7 @@ import torch
 import librosa
 import librosa.display
 import soundfile as sf
+import matplotlib.pyplot as plt
 
 from src.logger import create_logger
 from src.loader import normalize_images
@@ -61,6 +62,7 @@ assert params.output_path.lower().endswith('.wav')
 ### Attr Parsing
 ################
 
+# create attr dict
 attrib_list = [item for item in params.attrib_list.split(',')]
 attribs = {k: 0 for k in attr_keys}
 attribs["bright"]     = int(attrib_list[0])
@@ -76,6 +78,7 @@ for name in attr_keys:
     a_1 = attribs[name]
     attrs.append(a_1)
 
+# attributes in the same form as the original paper shape()
 attributes = torch.FloatTensor(attrs)
 attributes = attributes.unsqueeze(0)
 
@@ -100,6 +103,7 @@ mels_n = np.expand_dims(mels_n, axis=1)
 data_m = torch.from_numpy(mels_n)
 
 # TODO check if true
+# image  = torch.from_numpy(mels_n)
 image = normalize_images(data_m.cpu())
 
 #####################
@@ -107,16 +111,26 @@ image = normalize_images(data_m.cpu())
 #####################
 
 enc_outputs = ae.encode(image)
-# print(enc_outputs[2].size())
-print(enc_outputs[0].size(0))
 output = ae.decode(enc_outputs, attributes)[-1]
+output_np = output.detach().numpy()
+output_np = output_np.squeeze()
 
 #####################
 ### Reconstruct audio
 #####################
-output_np = output.detach().numpy()
-output_np = output_np.squeeze()
-print(f"output shape:{output_np.shape}")
-y_inv = librosa.feature.inverse.mel_to_audio(output_np, sr=sr, hop_length=((4*16000)//256+1))
-print(f"y shape:{y_inv.shape}")
+y_inv = librosa.feature.inverse.mel_to_audio(output_np, sr=sr, hop_length=melspec_params['hop_length'])
+# normalize to source file amplitude
+y_inv = (y_inv / np.max(y_inv)) * np.max(x)
+
 sf.write(params.output_path, y_inv, sr)
+
+
+fig, ax = plt.subplots(1, figsize=(12,8))
+mfcc_image=librosa.display.specshow(output_np, ax=ax, sr=sr, y_axis='linear')
+ax.axes.get_xaxis().set_visible(False)
+ax.axes.get_yaxis().set_visible(False)
+ax.set_frame_on(False)
+ax.set_xlabel(None)
+ax.set_ylabel(None)
+#save the plots in testing folder
+fig.savefig('mfcc_image.png')

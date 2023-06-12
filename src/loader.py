@@ -84,6 +84,7 @@ def normalize_images(images):
     Normalize image values.
     """
     return images.float().div_(255.0).mul_(2.0).add_(-1)
+    # return images.float().div_(255.0).mul_(2.0).add_(-0.8)
 
 
 class DataSampler(object):
