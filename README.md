@@ -1,7 +1,8 @@
 # FaderNetworks PERSONAL
 
-**A simple fork for personal usage. All rights belong to their respective authors.**
+A simple fork for personal usage. Modified to run on Mel Scale Spectrograms on audio files to alter timbral adjectives. Used NSynth Dataset, pulled "bright", "dark", "distortion" and "percussive" from the "Note Qualities". Modified to work properly on the latest version of PyTorch (v2.0.1 as of writing), CUDA was not ported, runs on CPU. 
 
+**All rights belong to their respective authors.**
 
 ## Reference
 PyTorch implementation of [Fader Networks](https://arxiv.org/pdf/1706.00409.pdf) (NIPS 2017).
